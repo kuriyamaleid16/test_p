@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>ちくた君</title>
+	<style>
+		#canvas{
+			background-color:#eeeeee;
+		}
+	</style>
+	<script>
+		/* キャンバス関連 */
+		let canv;
+		let cont;
+		let clockTicks;
+		/* 時刻関連 */
+		let date;
+		let year;
+		let	month;
+		let day;
+		let hour;
+		let min;
+		let sec;
+		
+		function init(){
+			canv = document.getElementById("canvas");
+			cont = canv.getContext("2d");
+			cont.willReadFrequently = true;
+			
+			/* 座標確認用のハンドラを追加 */
+			canv.onmousemove = function(e){
+				document.getElementById("x").textContent = e.offsetX;
+				document.getElementById("y").textContent = e.offsetY;
+			};
+			
+			cont.fillStyle = "#FFFFFF"
+			cont.strokeStyle = "#000000";
+			cont.lineWidth = 4.5;
+			
+			/* 時間の目盛りを描く */
+			for(let i = 0; i < 12; i++){
+				let angle = (Math.PI /6) * i;
+				cont.save();
+				cont.translate(100 * 3,100 * 3);
+				cont.rotate(angle);
+				cont.moveTo(0,-50 * 3);
+				cont.lineTo(0,-60 * 3);
+				cont.stroke();
+				cont.restore();
+			}
+			
+			/* 色と太さを変更 */
+			cont.strokeStyle = "#333333";
+			cont.lineWidth = 1.0;
+			
+			/* 時間の分単位の目盛りを描く */
+			for(let i = 0; i < 12 * 5; i++){
+				let angle = (Math.PI / (6 * 5)) * i;
+				cont.save();
+				cont.translate(100 * 3,100 * 3);
+				cont.rotate(angle);
+				cont.moveTo(0,-50 * 3);
+				cont.lineTo(0,-60 * 3);
+				cont.stroke();
+				cont.restore();
+			
+			/* 現在のキャンバスを一枚の画像として保存 */
+			clockTicks = cont.getImageData(0,0,canv.width,canv.height);
+				
+			/* タイマーを起動 */
+			setInterval(drawClockHands,1000);
+			}
+		}
+		
+		function drawClockHands(){
+			getTime();
+			displayTime();
+			//ここがポイント
+			cont.putImageData(clockTicks,0,0);
+			drawSecHand();
+			drawMinHand();
+			drawHourHand();
+		}
+		
+		function getTime(){
+			date = new Date();
+			/* 現在時刻を取得 */
+			year = date.getFullYear();
+			month = date.getMonth();
+			day = date.getDate();
+			hour = date.getHours();
+			min = date.getMinutes();
+			sec = date.getSeconds();
+		}
+		
+		function displayTime(){
+			getTime();
+			/* 現在時刻を表示 */
+			if(min <= 9){
+				document.getElementById("now").textContent = year+"/"+month+"/"+day+" "+hour+":"+"0"+min;
+			}else{
+				document.getElementById("now").textContent = year+"/"+month+"/"+day+" "+hour+":"+min;
+			}
+		}
+		function drawSecHand(){
+			getTime();
+			/* 秒針を描画 */
+			cont.strokeStyle = "#FF0000";
+			cont.lineWidth = 1.0;
+			let secAngle = (Math.PI / 30) * sec;
+			cont.save();
+			cont.translate(100 * 3,100 * 3);
+			cont.rotate(secAngle);			
+			cont.beginPath();
+			cont.moveTo(0 ,0);
+			cont.lineTo(0 ,-60 * 3);
+			cont.stroke();
+			cont.restore();
+		}
+		
+		function drawMinHand(){
+			getTime();
+			/* 分針を描画 */
+			cont.strokeStyle = "#000000";
+			cont.lineWidth = 2.0;
+			let minAngle = (Math.PI / 30) * min;
+			cont.save();
+			cont.translate(100 * 3,100 * 3);
+			cont.rotate(minAngle);			
+			cont.beginPath();
+			cont.moveTo(0 ,0);
+			cont.lineTo(0 ,-60 * 3);
+			cont.stroke();
+			cont.restore();
+		}
+		
+		function drawHourHand(){
+			getTime();
+			/* 時針を描画 */
+			cont.strokeStyle = "#000000";
+			cont.lineWidth = 4.0;
+			let hourAngle = (Math.PI / 6) * hour;
+			cont.save();
+			cont.translate(100 * 3,100 * 3);
+			cont.rotate(hourAngle);			
+			cont.beginPath();
+			cont.moveTo(0 ,0);
+			cont.lineTo(0 ,-35 * 3);
+			cont.stroke();
+			cont.restore();
+		}
+	</script>
+</head>
+<body onload="init()">
+	<canvas id="canvas" width="600" height="600"></canvas>
+	<h2>canvas上の座標(<span id="x"></span>,<span id="y"></span>)</h2>
+	<h2>現在時刻: <span id="now"></span></h2>
+</body>
+</html>
